@@ -1,0 +1,132 @@
+apply plugin: 'com.android.application'
+
+import java.util.Properties
+
+def keystorePropertiesFile = rootProject.file("app/keystore/keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
+}
+
+android {
+    namespace "com.denofdevelopers.mktolls"
+    compileSdkVersion 36
+    buildToolsVersion '36.0.0'
+    flavorDimensions "default"
+    defaultConfig {
+        minSdkVersion 21
+        applicationId "com.denofdevelopers.mktolls"
+        targetSdkVersion 36
+        versionCode 4
+        versionName "1.1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+    }
+
+    buildFeatures {
+        buildConfig = true
+        resValues = true
+    }
+
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias'] ?: project.findProperty('MK_TOLLS_ALIAS')
+            keyPassword keystoreProperties['keyPassword'] ?: project.findProperty('MK_TOLLS_KEY_PASSWORD')
+            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : (project.hasProperty('MK_TOLLS_STORE_FILE') ? file(project.getProperty('MK_TOLLS_STORE_FILE')) : file('mktolls.jks'))
+            storePassword keystoreProperties['storePassword'] ?: project.findProperty('MK_TOLLS_STORE_PASSWORD')
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    productFlavors {
+        dev {
+            applicationIdSuffix ".dev"
+            resValue "string", "app_name", "Macedonian Tolls Dev"
+            resValue "string", "API_KEY_GOOGLE_MAPS", (keystoreProperties['mapsApiKey'] ?: project.findProperty('MK_TOLLS_MAPS_API_KEY') ?: "")
+            buildConfigField("String", "API_BASE_URL", "\"https://maps.googleapis.com/maps/api/\"");
+            resValue "string", "google_maps_api_key", (keystoreProperties['mapsApiKey'] ?: project.findProperty('MK_TOLLS_MAPS_API_KEY') ?: "")
+            buildConfigField("String", "API_KEY_GOOGLE_MAPS", "\"${keystoreProperties['mapsApiKey'] ?: project.findProperty('MK_TOLLS_MAPS_API_KEY') ?: ""}\"");
+        }
+
+        prod {
+            resValue "string", "app_name", "Macedonian Tolls"
+            resValue "string", "API_KEY_GOOGLE_MAPS", (keystoreProperties['mapsApiKey'] ?: project.findProperty('MK_TOLLS_MAPS_API_KEY') ?: "")
+            buildConfigField("String", "API_BASE_URL", "\"https://maps.googleapis.com/maps/api/\"");
+            resValue "string", "google_maps_api_key", (keystoreProperties['mapsApiKey'] ?: project.findProperty('MK_TOLLS_MAPS_API_KEY') ?: "")
+            buildConfigField("String", "API_KEY_GOOGLE_MAPS", "\"${keystoreProperties['mapsApiKey'] ?: project.findProperty('MK_TOLLS_MAPS_API_KEY') ?: ""}\"");
+        }
+    }
+
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/rxjava.properties', 'META-INF/LICENSE', 'META-INF/services/javax.annotation.processing.Processor']
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+
+    // ButterKnife
+    implementation 'com.jakewharton:butterknife:10.1.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
+
+    // Dagger2
+    implementation 'com.google.dagger:dagger:2.24'
+    annotationProcessor "com.google.dagger:dagger-compiler:2.24"
+
+    // Retrofit
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava:2.9.0'
+
+    // OkHTTP
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+
+    // Gson
+    implementation 'com.google.code.gson:gson:2.8.5'
+
+    // RX Java & Android
+    implementation 'io.reactivex:rxandroid:1.2.1'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.11'
+
+    // Picasso
+    implementation 'com.squareup.picasso:picasso:2.71828'
+
+    // LeakCanary
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'
+
+    implementation 'com.f2prateek.rx.preferences2:rx-preferences:2.0.0'
+
+    // Google Maps
+    implementation 'com.google.maps.android:android-maps-utils:0.4.4'
+    implementation 'com.google.android.gms:play-services-maps:17.0.0'
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
+
+    // Calligraphy3
+    implementation 'io.github.inflationx:calligraphy3:3.1.1'
+    implementation 'io.github.inflationx:viewpump:2.0.3'
+}
