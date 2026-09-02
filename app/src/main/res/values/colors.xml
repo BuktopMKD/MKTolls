@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#000000</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">#696969</color>+
+
+    <color name="backgroundGradientStart">#FFE565</color>+
+    <color name="backgroundGradientEnd">#FFA740</color>+
+
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+    <color name="yellow_logo">#FFBB12</color>
+    <color name="gray">#696969</color>
+    <color name="yellow">#EABD28</color>
+    <color name="yellowStart">#806200</color>
+    <color name="red">#E31B25</color>
+</resources>

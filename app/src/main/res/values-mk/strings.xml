@@ -1,0 +1,73 @@
+<resources>
+
+    <!-- Constants -->
+    <string name="toll">Патарина</string>
+    <string name="retry">Пробај повторно</string>
+
+    <!-- Calculate screen -->
+    <string name="calculate">Пресметај</string>
+    <string name="from_location">Почетна локација</string>
+    <string name="enter_start_location">Внесете почетна дестинација</string>
+    <string name="enter_end_location">Внесете крајна дестинација</string>
+    <string name="use_my_location">Користи ја мојата моемнтална локација</string>
+    <string name="start_end_filled">Почетнаѕа и крајната дестинација мораат да бидат внесени</string>
+
+    <!-- Toll names -->
+    <string name="petrovec">Петровец</string>
+    <string name="miladinovci">Младеновци</string>
+    <string name="rankovce">Ранковце</string>
+    <string name="otovica">Отовица</string>
+    <string name="novacani">Новачани</string>
+    <string name="glumovo">Глумово</string>
+    <string name="zelino">Желино</string>
+    <string name="tetovo">Тетово</string>
+    <string name="gostivar">Гостивар</string>
+    <string name="gradsko">Градско</string>
+
+    <!-- National park-toll names -->
+    <string name="galicica">Галичица</string>
+    <string name="pelister">Пелистер</string>
+    <string name="mavrovo">Маврово</string>
+
+    <!-- Categories -->
+    <string-array name="category_array">
+        <item>@string/category_1A</item>
+        <item>@string/category_1B</item>
+        <item>@string/category_2</item>
+        <item>@string/category_3</item>
+        <item>@string/category_4</item>
+    </string-array>
+
+    <string name="category_1A">Категорија 1A: Мотоцикл</string>
+    <string name="category_1B">Категорија 1Б: Автомобил, Комбе</string>
+    <string name="category_2">Категорија 2: Автомобил или комбе со приколка, Минибус</string>
+    <string name="category_3">Категорија 3: Камион, Автобус</string>
+    <string name="category_4">Категорија 4: Камион или автобус со приколка</string>
+
+    <!-- Vehicles -->
+    <string name="car">Автомобил</string>
+    <string name="motorcycle">Мотоцикл</string>
+    <string name="van">Комбе</string>
+    <string name="truck">Камион</string>
+    <string name="bus">Автобус</string>
+    <string name="title_activity_maps">Мапа</string>
+
+    <!-- Map -->
+    <string name="address_not_found">Специфицираната адреса не е пронајдена</string>
+    <string name="map_button_toolbar">Map button</string>
+
+    <!-- Message -->
+    <string name="no_internet_connection">Нема интернет конекција</string>
+    <string name="generic_error">Се случи грешка, Ве молиме обидете се повторно</string>
+    <string name="gps_permission">Има потреба од GPS дозвола за да се пристапи кон вашата локација.</string>
+    <string name="no_google_play_services">Овој уред не е поддржан. Ве молиме инсталирајте Google Play Services.</string>
+    <string name="check_if_location_is_enabled">Не може да се пристапи на вашата локација. Осигурајте се дека локациските услуги на вашиот уред се вклучени</string>
+
+    <!-- Result Activity -->
+    <string name="format_denars" formatted="false">%.2f ден.</string>
+    <string name="format_euro" formatted="false">%.2f \u20ac</string>
+    <string name="total">Вкупнито збир на сите патарини на вашата рута е \n%1$s денари или %2$s евра.</string>
+    <string name="tolls_not_found">Не се пронајдени патарини на оваа рута!</string>
+    <string name="show_on_map">Прикажи на мапа</string>
+
+</resources>

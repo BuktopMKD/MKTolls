@@ -1,0 +1,73 @@
+<resources>
+
+    <!-- Common -->
+    <string name="toll">Toll</string>
+    <string name="retry">Retry</string>
+
+    <!-- Calculate screen -->
+    <string name="calculate">Calculate</string>
+    <string name="from_location">From location:</string>
+    <string name="enter_start_location">Enter start location</string>
+    <string name="enter_end_location">Enter end location</string>
+    <string name="use_my_location">Use my current location</string>
+    <string name="start_end_filled">Start and end location must be set</string>
+
+    <!-- Toll names -->
+    <string name="petrovec">Petrovec</string>
+    <string name="miladinovci">Miladinovci</string>
+    <string name="rankovce">Rankovce</string>
+    <string name="otovica">Otovica</string>
+    <string name="novacani">Novacani</string>
+    <string name="glumovo">Glumovo</string>
+    <string name="zelino">Zelino</string>
+    <string name="tetovo">Tetovo</string>
+    <string name="gostivar">Gostivar</string>
+    <string name="gradsko">Gradsko</string>
+
+    <!-- National park-toll names -->
+    <string name="galicica">Galichica</string>
+    <string name="pelister">Pelister</string>
+    <string name="mavrovo">Mavrovo</string>
+
+    <!-- Categories -->
+    <string-array name="category_array">
+        <item>@string/category_1A</item>
+        <item>@string/category_1B</item>
+        <item>@string/category_2</item>
+        <item>@string/category_3</item>
+        <item>@string/category_4</item>
+    </string-array>
+
+    <string name="category_1A">Category 1A: Motorcycle</string>
+    <string name="category_1B">Category 1B: Car, Van</string>
+    <string name="category_2">Category 2: Car or van with trailer, Minibus</string>
+    <string name="category_3">Category 3: Truck, Bus</string>
+    <string name="category_4">Category 4: Truck or Bus with trailer</string>
+
+    <!-- Vehicles -->
+    <string name="car">Car</string>
+    <string name="motorcycle">Motorcycle</string>
+    <string name="van">Van</string>
+    <string name="truck">Truck</string>
+    <string name="bus">Bus</string>
+    <string name="title_activity_maps">Map</string>
+
+    <!-- Map -->
+    <string name="address_not_found">Specified address not found</string>
+    <string name="map_button_toolbar">Map button</string>
+
+    <!-- Message -->
+    <string name="no_internet_connection">No internet connection</string>
+    <string name="generic_error">An error occurred, please try again</string>
+    <string name="gps_permission">Need GPS permission for getting your location.</string>
+    <string name="no_google_play_services">This device is not supported. Please install Google Play Services.</string>
+    <string name="check_if_location_is_enabled">Couldn\'t get the location. Make sure location is enabled on the device</string>
+
+    <!-- Result Activity -->
+    <string name="format_denars" formatted="false">%.2f ден.</string>
+    <string name="format_euro" formatted="false">%.2f \u20ac</string>
+    <string name="total">The total sum of all tolls on your route is \n%1$s denars or %2$s euros.</string>
+    <string name="tolls_not_found">Tolls are not found on this route!</string>
+    <string name="show_on_map">Show on map</string>
+
+</resources>
