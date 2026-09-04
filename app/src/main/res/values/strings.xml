@@ -23,6 +23,20 @@
     <string name="tetovo">Tetovo</string>
     <string name="gostivar">Gostivar</string>
     <string name="gradsko">Gradsko</string>
+    <string name="preod">Preod</string>
+    <string name="kadrifakovo">Kadrifakovo</string>
+    <string name="evzoni">Evzoni</string>
+    <string name="malgara">Malgara</string>
+    <string name="kleidi">Kleidi</string>
+    <string name="leptokarya">Leptokarya</string>
+    <string name="polymylos">Polymylos</string>
+    <string name="thessaloniki_ring">Thessaloniki Ring Road</string>
+    <string name="siatista">Siatista</string>
+    <string name="malakasi">Malakasi</string>
+    <string name="pamvotida">Pamvotida</string>
+    <string name="tyria">Tyria</string>
+    <string name="terovo">Terovo</string>
+    <string name="aktio_preveza">Aktio-Preveza Tunnel</string>
 
     <!-- National park-toll names -->
     <string name="galicica">Galichica</string>
