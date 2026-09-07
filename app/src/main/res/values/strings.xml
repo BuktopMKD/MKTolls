@@ -27,7 +27,7 @@
     <string name="kadrifakovo">Kadrifakovo</string>
     <string name="evzoni">Evzoni</string>
     <string name="malgara">Malgara</string>
-    <string name="kleidi">Kleidi</string>
+    <string name="aeginio">Aeginio (Kleidi)</string>
     <string name="leptokarya">Leptokarya</string>
     <string name="polymylos">Polymylos</string>
     <string name="thessaloniki_ring">Thessaloniki Ring Road</string>
@@ -37,6 +37,13 @@
     <string name="tyria">Tyria</string>
     <string name="terovo">Terovo</string>
     <string name="aktio_preveza">Aktio-Preveza Tunnel</string>
+    <string name="analipsi">Analipsi</string>
+    <string name="asprovalta">Asprovalta</string>
+    <string name="moustheni">Moustheni</string>
+    <string name="kavala">Kavala</string>
+    <string name="iasmos">Iasmos</string>
+    <string name="mesti">Mesti</string>
+    <string name="ardanio">Ardanio</string>
 
     <!-- National park-toll names -->
     <string name="galicica">Galichica</string>
