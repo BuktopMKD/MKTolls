@@ -9,35 +9,32 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
 import com.denofdevelopers.mktolls.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.location.Priority;
+import com.google.android.gms.location.SettingsClient;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class LocationHelper implements LocationPermissionsUtil.PermissionResultCallback, GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, ActivityCompat.OnRequestPermissionsResultCallback, LocationListener {
+public class LocationHelper implements LocationPermissionsUtil.PermissionResultCallback, ActivityCompat.OnRequestPermissionsResultCallback {
 
     private Context context;
     private Activity currentActivity;
@@ -46,11 +43,10 @@ public class LocationHelper implements LocationPermissionsUtil.PermissionResultC
 
     private Location mLastLocation;
 
-    // Google client to interact with Google API
-
-    private GoogleApiClient mGoogleApiClient;
+    private FusedLocationProviderClient mFusedLocationClient;
+    private SettingsClient mSettingsClient;
     private LocationRequest mLocationRequest;
-    // list of permissions
+    private LocationCallback mLocationCallback;
 
     private ArrayList<String> permissions = new ArrayList<>();
     private LocationPermissionsUtil locationPermissionsUtil;
@@ -59,9 +55,11 @@ public class LocationHelper implements LocationPermissionsUtil.PermissionResultC
     private static final int REQUEST_CHECK_SETTINGS = 2000;
 
     public LocationHelper(Context context) {
-
         this.context = context;
         this.currentActivity = (Activity) context;
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+        mSettingsClient = LocationServices.getSettingsClient(context);
 
         locationPermissionsUtil = new LocationPermissionsUtil(context, this);
 
@@ -69,9 +67,6 @@ public class LocationHelper implements LocationPermissionsUtil.PermissionResultC
         permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
     }
 
-    /**
-     * Method to check the availability of location permissions
-     */
     public void checkPermission() {
         locationPermissionsUtil.check_permission(permissions, context.getString(R.string.gps_permission), 1);
     }
@@ -80,15 +75,9 @@ public class LocationHelper implements LocationPermissionsUtil.PermissionResultC
         return isPermissionGranted;
     }
 
-    /**
-     * Method to verify google play services on the device
-     */
     public boolean checkPlayServices(boolean shouldDisplayNoServicesPopup) {
-
         GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
-
         int resultCode = googleApiAvailability.isGooglePlayServicesAvailable(context);
-
         if (resultCode != ConnectionResult.SUCCESS) {
             if (shouldDisplayNoServicesPopup) {
                 if (googleApiAvailability.isUserResolvableError(resultCode)) {
@@ -103,20 +92,17 @@ public class LocationHelper implements LocationPermissionsUtil.PermissionResultC
         return true;
     }
 
-    /**
-     * Method to display the location on UI
-     */
     public Location getLocation() {
-
         if (isPermissionGranted()) {
-
             try {
                 if (mLastLocation != null) {
                     return mLastLocation;
                 }
-                mLastLocation = LocationServices.FusedLocationApi
-                        .getLastLocation(mGoogleApiClient);
-
+                mFusedLocationClient.getLastLocation().addOnSuccessListener(currentActivity, location -> {
+                    if (location != null) {
+                        mLastLocation = location;
+                    }
+                });
                 return mLastLocation;
             } catch (SecurityException e) {
                 Log.e("--->", e.getMessage(), e.getCause());
@@ -126,117 +112,87 @@ public class LocationHelper implements LocationPermissionsUtil.PermissionResultC
     }
 
     public Address getAddress(double latitude, double longitude) {
-        Geocoder geocoder;
-        List<Address> addresses;
-        geocoder = new Geocoder(context, Locale.getDefault());
-
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         try {
-            addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
-            return addresses.get(0);
-
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            if (addresses != null && !addresses.isEmpty()) {
+                return addresses.get(0);
+            }
         } catch (IOException e) {
             Log.e("--->", e.getMessage(), e.getCause());
         }
         return null;
     }
 
-    /**
-     * Method used to build GoogleApiClient
-     */
     public void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(context)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API).build();
+        createLocationRequest();
 
-        mGoogleApiClient.connect();
-
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(@NonNull LocationResult locationResult) {
+                for (Location location : locationResult.getLocations()) {
+                    mLastLocation = location;
+                }
+            }
+        };
 
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(mLocationRequest);
 
-        PendingResult<LocationSettingsResult> result =
-                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
-
-        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-            @Override
-            public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
-
-                final Status status = locationSettingsResult.getStatus();
-
-                switch (status.getStatusCode()) {
-                    case LocationSettingsStatusCodes.SUCCESS:
-                        // All location settings are satisfied. The client can initialize location requests here
-                        mLastLocation = getLocation();
-                        break;
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+        mSettingsClient.checkLocationSettings(builder.build())
+                .addOnSuccessListener(currentActivity, locationSettingsResponse -> startLocationUpdates())
+                .addOnFailureListener(currentActivity, e -> {
+                    if (e instanceof ResolvableApiException) {
                         try {
-                            // Show the dialog by calling startResolutionForResult(),
-                            // and check the result in onActivityResult().
-                            status.startResolutionForResult(currentActivity, REQUEST_CHECK_SETTINGS);
-
-                        } catch (IntentSender.SendIntentException e) {
-                            // Ignore the error.
+                            ((ResolvableApiException) e).startResolutionForResult(currentActivity, REQUEST_CHECK_SETTINGS);
+                        } catch (IntentSender.SendIntentException sendEx) {
+                            // Ignore
                         }
-                        break;
-                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        break;
-                }
-            }
-        });
+                    }
+                });
     }
 
-    /**
-     * Method used to connect GoogleApiClient
-     */
+    private void createLocationRequest() {
+        mLocationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000)
+                .setMinUpdateIntervalMillis(5000)
+                .build();
+    }
+
+    private void startLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.getMainLooper());
+    }
+
     public void connectApiClient() {
-        if (mGoogleApiClient != null) {
-            mGoogleApiClient.connect();
+        if (mLocationRequest == null) {
+            buildGoogleApiClient();
+        } else {
+            startLocationUpdates();
         }
     }
 
-    /**
-     * Method used to get the GoogleApiClient
-     */
-    public GoogleApiClient getGoogleApiClient() {
-        return mGoogleApiClient;
+    public Object getGoogleApiClient() {
+        return mFusedLocationClient;
     }
 
     public void disconnectApiClient() {
-        if (mGoogleApiClient != null) {
-            mGoogleApiClient.disconnect();
+        if (mFusedLocationClient != null && mLocationCallback != null) {
+            mFusedLocationClient.removeLocationUpdates(mLocationCallback);
         }
     }
 
-    /**
-     * Handles the permission results
-     */
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         locationPermissionsUtil.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    /**
-     * Handles the activity results
-     */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case REQUEST_CHECK_SETTINGS:
-                switch (resultCode) {
-                    case Activity.RESULT_OK:
-                        // All required changes were successfully made
-                        mLastLocation = getLocation();
-                        break;
-                    case Activity.RESULT_CANCELED:
-                        // The user was asked to change settings, but chose not to
-                        break;
-                    default:
-                        break;
-                }
-                break;
+        if (requestCode == REQUEST_CHECK_SETTINGS) {
+            if (resultCode == Activity.RESULT_OK) {
+                startLocationUpdates();
+            }
         }
     }
 
@@ -263,29 +219,5 @@ public class LocationHelper implements LocationPermissionsUtil.PermissionResultC
 
     private void showToast(String message) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        if (ActivityCompat.checkSelfPermission(currentActivity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(currentActivity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            checkPermission();
-            return;
-        }
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        mLastLocation = location;
     }
 }

@@ -3,6 +3,9 @@ package com.denofdevelopers.mktolls.screen.screen.main;
 import com.denofdevelopers.mktolls.common.presenter.BasePresenter;
 import com.denofdevelopers.mktolls.model.CurrentLocation;
 
+import android.location.Location;
+import rx.functions.Action1;
+
 public interface MainContract {
 
     interface Presenter extends BasePresenter<MainActivity> {
@@ -15,6 +18,8 @@ public interface MainContract {
         void connectApiClient();
 
         CurrentLocation getLocation();
+
+        void getAddressForLocation(Location location, Action1<String> callback);
     }
 
     interface View {

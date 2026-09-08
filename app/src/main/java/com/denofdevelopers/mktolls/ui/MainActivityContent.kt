@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -50,8 +51,8 @@ fun MainActivityContent(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFFFFE565),
-                            Color(0xFFFFA740)
+                            colorResource(id = R.color.backgroundGradientStart),
+                            colorResource(id = R.color.backgroundGradientEnd)
                         )
                     )
                 )

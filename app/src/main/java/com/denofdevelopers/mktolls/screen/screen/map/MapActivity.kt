@@ -10,6 +10,7 @@ import android.widget.ProgressBar
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.lifecycleScope
 import com.denofdevelopers.mktolls.BuildConfig
 import com.denofdevelopers.mktolls.R
 import com.denofdevelopers.mktolls.application.App
@@ -25,6 +26,9 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import rx.Observer
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -138,15 +142,19 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         val startPoint = bundle.getString(START_POINT_EXTRA) ?: ""
         val endPoint = bundle.getString(END_POINT_EXTRA) ?: ""
         category = bundle.getString(CATEGORY_EXTRA)
-        
-        val startLocation = MapUtil.getLocationPoints(this, startPoint)
-        val endLocation = MapUtil.getLocationPoints(this, endPoint)
-        
-        if (startLocation != null) addMarkerStartEnd(startLocation, startPoint, true)
-        if (endLocation != null) addMarkerStartEnd(endLocation, endPoint, false)
-        
-        if (startLocation != null && endLocation != null) {
-            getRoutePoints(startLocation, endLocation)
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val startLocation = MapUtil.getLocationPoints(this@MapActivity, startPoint)
+            val endLocation = MapUtil.getLocationPoints(this@MapActivity, endPoint)
+
+            withContext(Dispatchers.Main) {
+                if (startLocation != null) addMarkerStartEnd(startLocation, startPoint, true)
+                if (endLocation != null) addMarkerStartEnd(endLocation, endPoint, false)
+
+                if (startLocation != null && endLocation != null) {
+                    getRoutePoints(startLocation, endLocation)
+                }
+            }
         }
     }
 

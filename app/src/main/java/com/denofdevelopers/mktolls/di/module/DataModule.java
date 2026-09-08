@@ -46,12 +46,12 @@ public class DataModule {
     @Singleton
     @Named(NamedValues.tollList)
     List<Toll> provideTollList(@Named(NamedValues.tolls) Preference<String> tolls, Gson gson) {
-        List<Toll> tollList = new ArrayList<>();
-        if (gson.fromJson(tolls.get(), new TypeToken<List<Toll>>() {
-        }.getType()) != null) {
-            tollList = gson.fromJson(tolls.get(), new TypeToken<List<Toll>>() {
-            }.getType());
+        String json = tolls.get();
+        if (json.isEmpty()) {
+            return new ArrayList<>();
         }
-        return tollList;
+        List<Toll> tollList = gson.fromJson(json, new TypeToken<List<Toll>>() {
+        }.getType());
+        return tollList != null ? tollList : new ArrayList<>();
     }
 }

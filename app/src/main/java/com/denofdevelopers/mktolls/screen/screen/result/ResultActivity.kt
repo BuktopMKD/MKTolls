@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.*
+import androidx.lifecycle.lifecycleScope
 import com.denofdevelopers.mktolls.BuildConfig
 import com.denofdevelopers.mktolls.R
 import com.denofdevelopers.mktolls.application.App
@@ -21,6 +22,9 @@ import com.denofdevelopers.mktolls.util.MapUtil
 import com.denofdevelopers.mktolls.util.NetworkUtil
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.PolyUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import rx.Observer
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -94,18 +98,22 @@ class ResultActivity : AppCompatActivity(), ResultContract.View {
     }
 
     private fun displayTolls() {
-        val startPoint = MapUtil.getLocationPoints(this, fromLocation)
-        val endPoint = MapUtil.getLocationPoints(this, toLocation)
+        lifecycleScope.launch(Dispatchers.IO) {
+            val startPoint = MapUtil.getLocationPoints(this@ResultActivity, fromLocation)
+            val endPoint = MapUtil.getLocationPoints(this@ResultActivity, toLocation)
 
-        if (startPoint == null || endPoint == null) {
-            if (!NetworkUtil.isConnected(this)) {
-                showError(getString(R.string.no_internet_connection))
-            } else {
-                showMessage(getString(R.string.address_not_found))
+            withContext(Dispatchers.Main) {
+                if (startPoint == null || endPoint == null) {
+                    if (!NetworkUtil.isConnected(this@ResultActivity)) {
+                        showError(getString(R.string.no_internet_connection))
+                    } else {
+                        showMessage(getString(R.string.address_not_found))
+                    }
+                } else {
+                    showProgress()
+                    getRoutePoints(startPoint, endPoint)
+                }
             }
-        } else {
-            showProgress()
-            getRoutePoints(startPoint, endPoint)
         }
     }
 

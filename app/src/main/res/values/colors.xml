@@ -2,10 +2,10 @@
 <resources>
     <color name="colorPrimary">#000000</color>
     <color name="colorPrimaryDark">#000000</color>
-    <color name="colorAccent">#696969</color>+
+    <color name="colorAccent">#696969</color>
 
-    <color name="backgroundGradientStart">#FFE565</color>+
-    <color name="backgroundGradientEnd">#FFA740</color>+
+    <color name="backgroundGradientStart">#FFFFFF</color>
+    <color name="backgroundGradientEnd">#FFFFFF</color>
 
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>

@@ -2,7 +2,6 @@ package com.denofdevelopers.mktolls.screen.screen.main;
 
 import android.location.Address;
 import android.location.Location;
-import android.os.Handler;
 import android.util.Log;
 
 import com.denofdevelopers.mktolls.BuildConfig;
@@ -14,9 +13,11 @@ import com.denofdevelopers.mktolls.util.MapUtil;
 import com.google.android.gms.maps.model.LatLng;
 
 import retrofit2.adapter.rxjava.Result;
+import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 public class MainPresenter implements MainContract.Presenter {
@@ -29,21 +30,26 @@ public class MainPresenter implements MainContract.Presenter {
     public MainPresenter(ApiService apiService, MainActivity activity) {
         this.apiService = apiService;
         this.activity = activity;
-        takeView();
     }
 
 
     @Override
     public void shouldStartNextActivity(String start, String end) {
-        Handler handler = new Handler();
-        handler.postDelayed(() -> {
-            if (areLocationsValid(start, end)) {
-                activity.startNextActivity(start, end);
-            } else {
-                activity.showAlertMessage(activity.getString(R.string.address_not_found));
-                activity.hideProgress();
-            }
-        }, 200);
+        Observable.fromCallable(() -> areLocationsValid(start, end))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(isValid -> {
+                    if (isValid) {
+                        activity.startNextActivity(start, end);
+                    } else {
+                        activity.showAlertMessage(activity.getString(R.string.address_not_found));
+                        activity.hideProgress();
+                    }
+                }, throwable -> {
+                    Log.e("MainPresenter", "Error validating locations", throwable);
+                    activity.showAlertMessage(activity.getString(R.string.address_not_found));
+                    activity.hideProgress();
+                });
     }
 
     private boolean areLocationsValid(String start, String end) {
@@ -76,7 +82,7 @@ public class MainPresenter implements MainContract.Presenter {
                 });
     }
 
-    private void takeView() {
+    public void takeView() {
         locationHelper = new LocationHelper(activity);
         setupLocation();
     }
@@ -90,9 +96,11 @@ public class MainPresenter implements MainContract.Presenter {
     }
 
     public void connectApiClient() {
-        if (locationHelper.getGoogleApiClient() != null && !locationHelper.getGoogleApiClient().isConnected()) {
-            locationHelper.connectApiClient();
-        }
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            if (locationHelper != null) {
+                locationHelper.connectApiClient();
+            }
+        }, 500);
     }
 
     @Override
@@ -102,14 +110,27 @@ public class MainPresenter implements MainContract.Presenter {
             CurrentLocation reportProblemLocation = new CurrentLocation();
             reportProblemLocation.setLatitude(mLastLocation.getLatitude());
             reportProblemLocation.setLongitude(mLastLocation.getLongitude());
-            Address locationAddress = getAddress(mLastLocation);
-            if (locationAddress != null) {
-                reportProblemLocation.setName(locationAddress.getAddressLine(0));
-            }
             return reportProblemLocation;
         }
 
         return null;
+    }
+
+    @Override
+    public void getAddressForLocation(Location location, Action1<String> callback) {
+        Observable.fromCallable(() -> getAddress(location))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(address -> {
+                    if (address != null) {
+                        callback.call(address.getAddressLine(0));
+                    } else {
+                        callback.call("");
+                    }
+                }, throwable -> {
+                    Log.e("MainPresenter", "Error getting address", throwable);
+                    callback.call("");
+                });
     }
 
     private Address getAddress(Location location) {
@@ -130,7 +151,7 @@ public class MainPresenter implements MainContract.Presenter {
     @Override
     public void dropView() {
         cancelRequest();
-        if (hasPlayServices(false)) {
+        if (locationHelper != null) {
             locationHelper.disconnectApiClient();
         }
     }

@@ -22,6 +22,10 @@ public final class MapUtil {
         return location.latitude + "," + location.longitude;
     }
 
+    /**
+     * NOTE: This is a blocking call because it performs network/geocoding operations.
+     * Should be called from a background thread.
+     */
     public static LatLng getLocationPoints(Context context, String location) {
         LatLng latLng = null;
         Double longitude;

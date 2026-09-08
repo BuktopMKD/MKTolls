@@ -7,7 +7,6 @@ import com.denofdevelopers.mktolls.screen.screen.main.MainComponent;
 import com.denofdevelopers.mktolls.screen.screen.main.MainModule;
 import com.denofdevelopers.mktolls.screen.screen.map.MapActivity;
 import com.denofdevelopers.mktolls.screen.screen.result.ResultActivity;
-import com.denofdevelopers.mktolls.screen.screen.splash.SplashScreenActivity;
 
 import javax.inject.Singleton;
 
@@ -24,8 +23,6 @@ import dagger.Component;
 public interface AppComponent {
 
     void plus(MapActivity mapActivity);
-
-    void plus(SplashScreenActivity splashScreenActivity);
 
     void plus(ResultActivity resultActivity);
 
