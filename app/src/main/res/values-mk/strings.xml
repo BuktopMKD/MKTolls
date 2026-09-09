@@ -9,6 +9,9 @@
     <string name="from_location">Почетна локација</string>
     <string name="enter_start_location">Внесете почетна дестинација</string>
     <string name="enter_end_location">Внесете крајна дестинација</string>
+    <string name="enter_mid_location">Внесете средна дестинација</string>
+    <string name="add_mid_location">Додади средна точка</string>
+    <string name="remove_mid_location">Избриши средна точка</string>
     <string name="use_my_location">Користи ја мојата моемнтална локација</string>
     <string name="start_end_filled">Почетнаѕа и крајната дестинација мораат да бидат внесени</string>
 
@@ -90,5 +93,8 @@
     <string name="total">Вкупнито збир на сите патарини на вашата рута е \n%1$s денари или %2$s евра.</string>
     <string name="tolls_not_found">Не се пронајдени патарини на оваа рута!</string>
     <string name="show_on_map">Прикажи на мапа</string>
-
+    <string name="language_mk">Македонски</string>
+    <string name="language_en">English</string>
+    <string name="language_sr">Српски</string>
+    <string name="vehicle_category">Категорија на возило</string>
 </resources>

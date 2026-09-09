@@ -30,7 +30,8 @@ fun ResultScreen(
     onBackClick: () -> Unit,
     onShowMapClick: () -> Unit,
     totalDenars: Double,
-    totalEuros: Double
+    totalEuros: Double,
+    isLoading: Boolean
 ) {
     MKTollsTheme {
         Scaffold(
@@ -68,6 +69,17 @@ fun ResultScreen(
                         )
                     )
             ) {
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.3f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Color.White)
+                    }
+                }
+
                 Column(modifier = Modifier.fillMaxSize()) {
                     // Total summary card
                     TotalSummaryCard(totalDenars, totalEuros)

@@ -10,6 +10,7 @@ import rx.Observable;
 public interface ApiService {
     @GET("directions/json")
     Observable<Result<RouteResponse>> getPointsBetweenTwoLocations(@Query("origin") String origin, @Query("destination") String destination,
+                                                                   @Query("waypoints") String waypoints,
                                                                    @Query("sensor") boolean sensor, @Query("key") String key);
 
     @GET("geocode/json")

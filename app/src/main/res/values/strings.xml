@@ -9,6 +9,9 @@
     <string name="from_location">From location:</string>
     <string name="enter_start_location">Enter start location</string>
     <string name="enter_end_location">Enter end location</string>
+    <string name="enter_mid_location">Enter middle location</string>
+    <string name="add_mid_location">Add middle location</string>
+    <string name="remove_mid_location">Remove middle location</string>
     <string name="use_my_location">Use my current location</string>
     <string name="start_end_filled">Start and end location must be set</string>
 
@@ -90,5 +93,8 @@
     <string name="total">The total sum of all tolls on your route is \n%1$s denars or %2$s euros.</string>
     <string name="tolls_not_found">Tolls are not found on this route!</string>
     <string name="show_on_map">Show on map</string>
-
+    <string name="language_mk">Македонски</string>
+    <string name="language_en">English</string>
+    <string name="language_sr">Српски</string>
+    <string name="vehicle_category">Vehicle category</string>
 </resources>

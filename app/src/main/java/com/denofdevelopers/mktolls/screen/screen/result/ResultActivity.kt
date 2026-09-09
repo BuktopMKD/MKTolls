@@ -44,6 +44,7 @@ class ResultActivity : AppCompatActivity(), ResultContract.View {
 
     private var fromLocation: String = ""
     private var toLocation: String = ""
+    private var midLocation: String = ""
     private var category: String = ""
     private var routePoints = mutableListOf<LatLng>()
     private var routeTolls = mutableStateListOf<Toll>()
@@ -57,13 +58,15 @@ class ResultActivity : AppCompatActivity(), ResultContract.View {
     companion object {
         private const val FROM_LOCATION_EXTRA = "from.location.extra"
         private const val TO_LOCATION_EXTRA = "to.location.extra"
+        private const val MID_LOCATION_EXTRA = "mid.location.extra"
         private const val CATEGORY = "category"
 
         @JvmStatic
-        fun start(context: Context, fromLocation: String, toLocation: String, category: String) {
+        fun start(context: Context, fromLocation: String, toLocation: String, midLocation: String, category: String) {
             val intent = Intent(context, ResultActivity::class.java).apply {
                 putExtra(FROM_LOCATION_EXTRA, fromLocation)
                 putExtra(TO_LOCATION_EXTRA, toLocation)
+                putExtra(MID_LOCATION_EXTRA, midLocation)
                 putExtra(CATEGORY, category)
             }
             context.startActivity(intent)
@@ -77,6 +80,7 @@ class ResultActivity : AppCompatActivity(), ResultContract.View {
         
         fromLocation = intent.getStringExtra(FROM_LOCATION_EXTRA) ?: ""
         toLocation = intent.getStringExtra(TO_LOCATION_EXTRA) ?: ""
+        midLocation = intent.getStringExtra(MID_LOCATION_EXTRA) ?: ""
         category = intent.getStringExtra(CATEGORY) ?: ""
 
         setContent {
@@ -86,7 +90,8 @@ class ResultActivity : AppCompatActivity(), ResultContract.View {
                 onBackClick = { finish() },
                 onShowMapClick = { onShowMapClick() },
                 totalDenars = totalDenars,
-                totalEuros = totalEuros
+                totalEuros = totalEuros,
+                isLoading = isLoading
             )
         }
 
@@ -101,6 +106,7 @@ class ResultActivity : AppCompatActivity(), ResultContract.View {
         lifecycleScope.launch(Dispatchers.IO) {
             val startPoint = MapUtil.getLocationPoints(this@ResultActivity, fromLocation)
             val endPoint = MapUtil.getLocationPoints(this@ResultActivity, toLocation)
+            val midPoint = if (midLocation.isNotEmpty()) MapUtil.getLocationPoints(this@ResultActivity, midLocation) else null
 
             withContext(Dispatchers.Main) {
                 if (startPoint == null || endPoint == null) {
@@ -111,16 +117,18 @@ class ResultActivity : AppCompatActivity(), ResultContract.View {
                     }
                 } else {
                     showProgress()
-                    getRoutePoints(startPoint, endPoint)
+                    getRoutePoints(startPoint, endPoint, midPoint)
                 }
             }
         }
     }
 
-    private fun getRoutePoints(startPoint: LatLng, endPoint: LatLng) {
+    private fun getRoutePoints(startPoint: LatLng, endPoint: LatLng, midPoint: LatLng?) {
+        val waypoints = midPoint?.let { "via:${MapUtil.formatMapServiceQueryParameters(it)}" }
         request = apiService.getPointsBetweenTwoLocations(
             MapUtil.formatMapServiceQueryParameters(startPoint),
             MapUtil.formatMapServiceQueryParameters(endPoint),
+            waypoints,
             false,
             BuildConfig.API_KEY_GOOGLE_MAPS
         )
@@ -140,7 +148,9 @@ class ResultActivity : AppCompatActivity(), ResultContract.View {
                         val routeResponse = result.response()?.body()
                         if (routeResponse != null && routeResponse.routes.isNotEmpty()) {
                             routePoints.clear()
-                            routePoints.addAll(MapUtil.getRoutePoints(routeResponse.routes[0].routeLegs[0]))
+                            for (leg in routeResponse.routes[0].routeLegs) {
+                                routePoints.addAll(MapUtil.getRoutePoints(leg))
+                            }
                             redrawRecyclerView()
                         } else {
                             showError(getString(R.string.generic_error))
@@ -212,7 +222,7 @@ class ResultActivity : AppCompatActivity(), ResultContract.View {
     }
 
     private fun onShowMapClick() {
-        MapActivity.start(this, fromLocation, toLocation, ArrayList(routeTolls), category)
+        MapActivity.start(this, fromLocation, toLocation, midLocation, ArrayList(routeTolls), category)
     }
 
     override fun onStop() {

@@ -1,0 +1,100 @@
+<resources>
+
+    <!-- Common -->
+    <string name="toll">Патарина</string>
+    <string name="retry">Покушај поново</string>
+
+    <!-- Calculate screen -->
+    <string name="calculate">Израчунај</string>
+    <string name="from_location">Почетна локација</string>
+    <string name="enter_start_location">Унесите почетну дестинацију</string>
+    <string name="enter_end_location">Унесите крајњу дестинацију</string>
+    <string name="enter_mid_location">Унесите средњу дестинацију</string>
+    <string name="add_mid_location">Додај средњу тачку</string>
+    <string name="remove_mid_location">Избриши средњу тачку</string>
+    <string name="use_my_location">Користи моју тренутну локацију</string>
+    <string name="start_end_filled">Почетна и крајња дестинација морају бити унете</string>
+
+    <!-- Toll names -->
+    <string name="petrovec">Петровец</string>
+    <string name="miladinovci">Миладиновци</string>
+    <string name="rankovce">Ранковце</string>
+    <string name="otovica">Отовица</string>
+    <string name="novacani">Новачани</string>
+    <string name="glumovo">Глумово</string>
+    <string name="zelino">Желино</string>
+    <string name="tetovo">Тетово</string>
+    <string name="gostivar">Гостивар</string>
+    <string name="gradsko">Градско</string>
+    <string name="preod">Преод</string>
+    <string name="kadrifakovo">Кадрифаково</string>
+    <string name="evzoni">Евзони</string>
+    <string name="malgara">Малгара</string>
+    <string name="aeginio">Аигинио (Клеиди)</string>
+    <string name="leptokarya">Лептокарија</string>
+    <string name="polymylos">Полимилос</string>
+    <string name="thessaloniki_ring">Солун (обилазница)</string>
+    <string name="siatista">Сиатиста</string>
+    <string name="malakasi">Малакаси (Мецово)</string>
+    <string name="pamvotida">Памвотида (Јањина)</string>
+    <string name="tyria">Тириа (Игуменица)</string>
+    <string name="terovo">Терово</string>
+    <string name="aktio_preveza">Тунел Акцио-Превеза</string>
+    <string name="analipsi">Аналипси</string>
+    <string name="asprovalta">Аспровалта</string>
+    <string name="moustheni">Мустени</string>
+    <string name="kavala">Кавала</string>
+    <string name="iasmos">Иасмос</string>
+    <string name="mesti">Мести</string>
+    <string name="ardanio">Арданио</string>
+
+    <!-- National park-toll names -->
+    <string name="galicica">Галичица</string>
+    <string name="pelister">Пелистер</string>
+    <string name="mavrovo">Маврово</string>
+
+    <!-- Categories -->
+    <string-array name="category_array">
+        <item>@string/category_1A</item>
+        <item>@string/category_1B</item>
+        <item>@string/category_2</item>
+        <item>@string/category_3</item>
+        <item>@string/category_4</item>
+    </string-array>
+
+    <string name="category_1A">Категорија 1А: Мотоцикл</string>
+    <string name="category_1B">Категорија 1Б: Аутомобил, Комби</string>
+    <string name="category_2">Категорија 2: Аутомобил или комби са приколицом, Минибус</string>
+    <string name="category_3">Категорија 3: Камион, Аутобус</string>
+    <string name="category_4">Категорија 4: Камион или аутобус са приколицом</string>
+
+    <!-- Vehicles -->
+    <string name="car">Аутомобил</string>
+    <string name="motorcycle">Мотоцикл</string>
+    <string name="van">Комби</string>
+    <string name="truck">Камион</string>
+    <string name="bus">Аутобус</string>
+    <string name="title_activity_maps">Мапа</string>
+
+    <!-- Map -->
+    <string name="address_not_found">Спецификована адреса није пронађена</string>
+    <string name="map_button_toolbar">Map button</string>
+
+    <!-- Message -->
+    <string name="no_internet_connection">Нема интернет конекције</string>
+    <string name="generic_error">Дошло је до грешке, молимо покушајте поново</string>
+    <string name="gps_permission">Потребна је ГПС дозвола за приступ вашој локацији.</string>
+    <string name="no_google_play_services">Овај уређај није подржан. Молимо инсталирајте Google Play Services.</string>
+    <string name="check_if_location_is_enabled">Није могуће приступити вашој локацији. Уверите се да су локацијске услуге на вашем уређају укључене</string>
+
+    <!-- Result Activity -->
+    <string name="format_denars" formatted="false">%.2f ден.</string>
+    <string name="format_euro" formatted="false">%.2f \u20ac</string>
+    <string name="total">Укупан збир свих патарина на вашој рути је \n%1$s денара или %2$s евра.</string>
+    <string name="tolls_not_found">Нису пронађене патарине на овој рути!</string>
+    <string name="show_on_map">Прикажи на мапи</string>
+    <string name="language_mk">Македонски</string>
+    <string name="language_en">English</string>
+    <string name="language_sr">Српски</string>
+    <string name="vehicle_category">Категорија возила</string>
+</resources>

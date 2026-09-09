@@ -7,8 +7,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,15 +35,22 @@ import com.denofdevelopers.mktolls.ui.theme.MKTollsTheme
 fun MainActivityContent(
     fromLocation: String,
     toLocation: String,
+    midLocation: String,
+    showMidLocation: Boolean,
     onFromLocationChange: (String) -> Unit,
     onToLocationChange: (String) -> Unit,
+    onMidLocationChange: (String) -> Unit,
+    onShowMidLocationChange: (Boolean) -> Unit,
     isFromMyLocation: Boolean,
     isToMyLocation: Boolean,
+    isMidMyLocation: Boolean,
     onFromMyLocationClick: (Boolean) -> Unit,
     onToMyLocationClick: (Boolean) -> Unit,
+    onMidMyLocationClick: (Boolean) -> Unit,
     categories: Array<String>,
     selectedCategoryIndex: Int,
     onCategorySelected: (Int) -> Unit,
+    onLanguageChange: (String) -> Unit,
     onCalculateClick: () -> Unit,
     isLoading: Boolean
 ) {
@@ -65,7 +75,49 @@ fun MainActivityContent(
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.height(40.dp))
+                // Language Selection
+                var langMenuExpanded by remember { mutableStateOf(false) }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentSize(Alignment.TopEnd)
+                ) {
+                    IconButton(onClick = { langMenuExpanded = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Language,
+                            contentDescription = "Change Language",
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = langMenuExpanded,
+                        onDismissRequest = { langMenuExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.language_mk)) },
+                            onClick = {
+                                onLanguageChange("mk")
+                                langMenuExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.language_en)) },
+                            onClick = {
+                                onLanguageChange("en")
+                                langMenuExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.language_sr)) },
+                            onClick = {
+                                onLanguageChange("sr")
+                                langMenuExpanded = false
+                            }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
                 
                 // Logo
                 Image(
@@ -89,7 +141,43 @@ fun MainActivityContent(
                     enabled = !isFromMyLocation
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Middle Location Toggle
+                TextButton(
+                    onClick = { onShowMidLocationChange(!showMidLocation) },
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .padding(end = 4.dp),
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = if (showMidLocation) Icons.Default.Remove else Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = if (showMidLocation) stringResource(R.string.remove_mid_location) else stringResource(R.string.add_mid_location),
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+
+                if (showMidLocation) {
+                    LocationInputCard(
+                        title = stringResource(R.string.enter_mid_location),
+                        value = midLocation,
+                        onValueChange = onMidLocationChange,
+                        isMyLocation = isMidMyLocation,
+                        onMyLocationClick = onMidMyLocationClick,
+                        enabled = !isMidMyLocation
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 // End Location Card
                 LocationInputCard(
@@ -114,7 +202,7 @@ fun MainActivityContent(
                         value = categories[selectedCategoryIndex],
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Категорија на возило") },
+                        label = { Text(stringResource(R.string.vehicle_category)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                         modifier = Modifier
                             .menuAnchor()

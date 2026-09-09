@@ -34,13 +34,13 @@ public class MainPresenter implements MainContract.Presenter {
 
 
     @Override
-    public void shouldStartNextActivity(String start, String end) {
-        Observable.fromCallable(() -> areLocationsValid(start, end))
+    public void shouldStartNextActivity(String start, String end, String middle) {
+        Observable.fromCallable(() -> areLocationsValid(start, end, middle))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(isValid -> {
                     if (isValid) {
-                        activity.startNextActivity(start, end);
+                        activity.startNextActivity(start, end, middle);
                     } else {
                         activity.showAlertMessage(activity.getString(R.string.address_not_found));
                         activity.hideProgress();
@@ -52,8 +52,9 @@ public class MainPresenter implements MainContract.Presenter {
                 });
     }
 
-    private boolean areLocationsValid(String start, String end) {
-        return convertLocations(start) != null && convertLocations(end) != null;
+    private boolean areLocationsValid(String start, String end, String middle) {
+        boolean isMidValid = middle == null || middle.isEmpty() || convertLocations(middle) != null;
+        return convertLocations(start) != null && convertLocations(end) != null && isMidValid;
     }
 
     private LatLng convertLocations(String location) {

@@ -5,7 +5,9 @@ import android.location.Location
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.*
+import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.lifecycleScope
 import com.denofdevelopers.mktolls.R
 import com.denofdevelopers.mktolls.application.App
@@ -44,8 +46,11 @@ class MainActivity : BaseActivity(), MainContract.View {
 
     private var fromLocation by mutableStateOf("")
     private var toLocation by mutableStateOf("")
+    private var midLocation by mutableStateOf("")
     private var isFromMyLocation by mutableStateOf(false)
     private var isToMyLocation by mutableStateOf(false)
+    private var isMidMyLocation by mutableStateOf(false)
+    private var showMidLocation by mutableStateOf(false)
     private var selectedCategoryIndex by mutableIntStateOf(1) // Default to Category 1B
     private var isLoading by mutableStateOf(false)
 
@@ -66,15 +71,21 @@ class MainActivity : BaseActivity(), MainContract.View {
             MainActivityContent(
                 fromLocation = fromLocation,
                 toLocation = toLocation,
+                midLocation = midLocation,
+                showMidLocation = showMidLocation,
                 onFromLocationChange = { fromLocation = it },
                 onToLocationChange = { toLocation = it },
+                onMidLocationChange = { midLocation = it },
+                onShowMidLocationChange = { showMidLocation = it },
                 isFromMyLocation = isFromMyLocation,
                 isToMyLocation = isToMyLocation,
+                isMidMyLocation = isMidMyLocation,
                 onFromMyLocationClick = { checked ->
                     isFromMyLocation = checked
                     if (checked) {
                         isToMyLocation = false
-                        getLocation(true)
+                        isMidMyLocation = false
+                        getLocation(true, false)
                     } else {
                         fromLocation = ""
                     }
@@ -83,14 +94,29 @@ class MainActivity : BaseActivity(), MainContract.View {
                     isToMyLocation = checked
                     if (checked) {
                         isFromMyLocation = false
-                        getLocation(false)
+                        isMidMyLocation = false
+                        getLocation(false, false)
                     } else {
                         toLocation = ""
+                    }
+                },
+                onMidMyLocationClick = { checked ->
+                    isMidMyLocation = checked
+                    if (checked) {
+                        isFromMyLocation = false
+                        isToMyLocation = false
+                        getLocation(false, true)
+                    } else {
+                        midLocation = ""
                     }
                 },
                 categories = categories,
                 selectedCategoryIndex = selectedCategoryIndex,
                 onCategorySelected = { selectedCategoryIndex = it },
+                onLanguageChange = { langCode ->
+                    val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags(langCode)
+                    AppCompatDelegate.setApplicationLocales(appLocale)
+                },
                 onCalculateClick = { calculateOnClick() },
                 isLoading = isLoading
             )
@@ -104,7 +130,7 @@ class MainActivity : BaseActivity(), MainContract.View {
         App.get(this).appComponent.plus(MainModule(this)).inject(this)
     }
 
-    private fun getLocation(isFrom: Boolean) {
+    private fun getLocation(isFrom: Boolean, isMid: Boolean) {
         if (!mainPresenter.hasPlayServices(true)) return
 
         val currentLocation = mainPresenter.location
@@ -117,20 +143,28 @@ class MainActivity : BaseActivity(), MainContract.View {
             mainPresenter.getAddressForLocation(location) { addressName ->
                 hideProgress()
                 if (addressName.isNotEmpty()) {
-                    if (isFrom) {
-                        fromLocation = addressName
-                    } else {
-                        toLocation = addressName
+                    when {
+                        isFrom -> fromLocation = addressName
+                        isMid -> midLocation = addressName
+                        else -> toLocation = addressName
                     }
                 } else {
                     showAlertMessage(getString(R.string.address_not_found))
-                    if (isFrom) isFromMyLocation = false else isToMyLocation = false
+                    when {
+                        isFrom -> isFromMyLocation = false
+                        isMid -> isMidMyLocation = false
+                        else -> isToMyLocation = false
+                    }
                 }
             }
         } else {
             mainPresenter.checkPermissions()
             showAlertMessage(getString(R.string.check_if_location_is_enabled))
-            if (isFrom) isFromMyLocation = false else isToMyLocation = false
+            when {
+                isFrom -> isFromMyLocation = false
+                isMid -> isMidMyLocation = false
+                else -> isToMyLocation = false
+            }
         }
     }
 
@@ -138,9 +172,9 @@ class MainActivity : BaseActivity(), MainContract.View {
         android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_SHORT).show()
     }
 
-    override fun startNextActivity(fromLocation: String, toLocation: String) {
+    override fun startNextActivity(fromLocation: String, toLocation: String, midLocation: String) {
         val categories = resources.getStringArray(R.array.category_array)
-        ResultActivity.start(this, fromLocation, toLocation, categories[selectedCategoryIndex])
+        ResultActivity.start(this, fromLocation, toLocation, midLocation, categories[selectedCategoryIndex])
     }
 
     fun showProgress() {
@@ -177,7 +211,7 @@ class MainActivity : BaseActivity(), MainContract.View {
             hideProgress()
         } else {
             if (fromLocation.isNotEmpty() && toLocation.isNotEmpty()) {
-                mainPresenter.shouldStartNextActivity(fromLocation, toLocation)
+                mainPresenter.shouldStartNextActivity(fromLocation, toLocation, if (showMidLocation) midLocation else "")
             } else {
                 showAlertMessage(getString(R.string.start_end_filled))
                 hideProgress()

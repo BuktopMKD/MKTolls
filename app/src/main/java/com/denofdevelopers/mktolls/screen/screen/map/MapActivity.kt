@@ -51,16 +51,18 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     companion object {
         private const val START_POINT_EXTRA = "start.point.extra"
         private const val END_POINT_EXTRA = "end.point.extra"
+        private const val MID_POINT_EXTRA = "mid.point.extra"
         private const val CATEGORY_EXTRA = "category.extra"
         private const val TOLL_POINTS_EXTRA = "toll.points.extra"
 
         @JvmStatic
-        fun start(context: Context, startPoint: String, endPoint: String, tollPoints: ArrayList<Toll>, category: String) {
+        fun start(context: Context, startPoint: String, endPoint: String, midPoint: String, tollPoints: ArrayList<Toll>, category: String) {
             val intent = Intent(context, MapActivity::class.java).apply {
                 val bundle = Bundle().apply {
                     putParcelableArrayList(TOLL_POINTS_EXTRA, tollPoints)
                     putString(START_POINT_EXTRA, startPoint)
                     putString(END_POINT_EXTRA, endPoint)
+                    putString(MID_POINT_EXTRA, midPoint)
                     putString(CATEGORY_EXTRA, category)
                 }
                 putExtras(bundle)
@@ -101,10 +103,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         progressBar.visibility = View.INVISIBLE
     }
 
-    private fun getRoutePoints(startPoint: LatLng, endPoint: LatLng) {
+    private fun getRoutePoints(startPoint: LatLng, endPoint: LatLng, midPoint: LatLng?) {
+        val waypoints = midPoint?.let { "via:${MapUtil.formatMapServiceQueryParameters(it)}" }
         request = apiService.getPointsBetweenTwoLocations(
             MapUtil.formatMapServiceQueryParameters(startPoint),
             MapUtil.formatMapServiceQueryParameters(endPoint),
+            waypoints,
             false,
             BuildConfig.API_KEY_GOOGLE_MAPS
         )
@@ -125,7 +129,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                     if (result.response()?.code() == 200) {
                         val routeResponse = result.response()?.body()
                         if (routeResponse != null && routeResponse.routes.isNotEmpty()) {
-                            val route = MapUtil.getRoutePoints(routeResponse.routes[0].routeLegs[0])
+                            val route = mutableListOf<LatLng>()
+                            for (leg in routeResponse.routes[0].routeLegs) {
+                                route.addAll(MapUtil.getRoutePoints(leg))
+                            }
                             addPolyline(route)
                             val bundle = intent.extras
                             val tollPoints = bundle?.getParcelableArrayList<Toll>(TOLL_POINTS_EXTRA)
@@ -141,18 +148,21 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         val bundle = intent.extras ?: return
         val startPoint = bundle.getString(START_POINT_EXTRA) ?: ""
         val endPoint = bundle.getString(END_POINT_EXTRA) ?: ""
+        val midPoint = bundle.getString(MID_POINT_EXTRA) ?: ""
         category = bundle.getString(CATEGORY_EXTRA)
 
         lifecycleScope.launch(Dispatchers.IO) {
             val startLocation = MapUtil.getLocationPoints(this@MapActivity, startPoint)
             val endLocation = MapUtil.getLocationPoints(this@MapActivity, endPoint)
+            val midLocation = if (midPoint.isNotEmpty()) MapUtil.getLocationPoints(this@MapActivity, midPoint) else null
 
             withContext(Dispatchers.Main) {
-                if (startLocation != null) addMarkerStartEnd(startLocation, startPoint, true)
-                if (endLocation != null) addMarkerStartEnd(endLocation, endPoint, false)
+                if (startLocation != null) addMarkerStartEnd(startLocation, startPoint, "Start location")
+                if (endLocation != null) addMarkerStartEnd(endLocation, endPoint, "End location")
+                if (midLocation != null) addMarkerStartEnd(midLocation, midPoint, "Middle location")
 
                 if (startLocation != null && endLocation != null) {
-                    getRoutePoints(startLocation, endLocation)
+                    getRoutePoints(startLocation, endLocation, midLocation)
                 }
             }
         }
@@ -168,12 +178,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         )
     }
 
-    private fun addMarkerStartEnd(latLng: LatLng, title: String, isStartLocation: Boolean) {
+    private fun addMarkerStartEnd(latLng: LatLng, title: String, snippet: String) {
         googleMap?.addMarker(
             MarkerOptions()
                 .position(latLng)
                 .title(title)
-                .snippet(if (isStartLocation) "Start location" else "End location")
+                .snippet(snippet)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
         )
     }
@@ -220,9 +230,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun addZoom(route: List<LatLng>) {
-        if (route.size > 2) {
-            val centerPoint = route[route.size / 2]
-            val update = CameraUpdateFactory.newLatLngZoom(centerPoint, 8f)
+        if (route.isNotEmpty()) {
+            val builder = LatLngBounds.Builder()
+            route.forEach { builder.include(it) }
+            val bounds = builder.build()
+            val padding = 150 // offset from edges of the map in pixels
+            val update = CameraUpdateFactory.newLatLngBounds(bounds, padding)
             googleMap?.animateCamera(update)
         }
     }

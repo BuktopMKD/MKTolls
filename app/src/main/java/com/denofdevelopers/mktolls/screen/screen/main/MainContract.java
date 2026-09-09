@@ -9,7 +9,7 @@ import rx.functions.Action1;
 public interface MainContract {
 
     interface Presenter extends BasePresenter<MainActivity> {
-        void shouldStartNextActivity(String start, String end);
+        void shouldStartNextActivity(String start, String end, String middle);
 
         boolean hasPlayServices(boolean shouldDisplayNoServicesPopup);
 
@@ -25,6 +25,6 @@ public interface MainContract {
     interface View {
         void showAlertMessage(String message);
 
-        void startNextActivity(String fromLocation, String toLocation);
+        void startNextActivity(String fromLocation, String toLocation, String midLocation);
     }
 }
